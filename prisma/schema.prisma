@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Livro {
+  id          Int          @id @default(autoincrement())
+  titulo      String
+  autor       String
+  quant       Int          // Estoque de livros disponíveis na estante
+  preco_multa Float        // Valor cobrado por dia de atraso na devolução
+  emprestimos Emprestimo[]
+
+  @@map("livros")
+}
+
+model Aluno {
+  id           Int          @id @default(autoincrement())
+  nome         String
+  email        String       @unique
+  saldo_credit Float        @default(0.0) // Saldo para pagar multas ou créditos pré-pagos
+  emprestimos  Emprestimo[]
+  depositos    Deposito[]
+
+  @@map("alunos")
+}
+
+model Emprestimo {
+  id        Int      @id @default(autoincrement())
+  alunoId   Int
+  livroId   Int
+  quant     Int      @default(1)
+  data      DateTime @default(now())
+
+  aluno     Aluno    @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  livro     Livro    @relation(fields: [livroId], references: [id], onDelete: Cascade)
+
+  @@map("emprestimos")
+}
+
+model Deposito {
+  id        Int      @id @default(autoincrement())
+  alunoId   Int
+  tipo      String   // Ex: "PIX", "Dinheiro"
+  valor     Float
+  data      DateTime @default(now())
+
+  aluno     Aluno    @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+
+  @@map("depositos")
+}
