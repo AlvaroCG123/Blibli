@@ -1,170 +1,192 @@
-# 📚 Documentação da API - Biblioteca (Trabalho #2 Segurança)
+# 📚 API da Biblioteca
 
-Este projeto implementa uma API para a gestão de uma Biblioteca com um robusto sistema de segurança, incluindo autenticação via Token JWT, proteção contra ataques de força bruta, deteção de anomalias diárias e *Soft Delete*.
+Esta API faz a gestão de uma biblioteca com autenticação por JWT, soft delete e registo de empréstimos, depósitos e utilizadores.
 
-## 🚀 Como testar (Postman / Insomnia)
+## Como testar
 
-Para as rotas que estão protegidas com o selo **[🔒 Requer Token]**, precisas primeiro de fazer **Login**, copiar o token devolvido e colar na aba **Authorization** -> **Bearer Token** do Postman/Insomnia.
+Nas rotas marcadas com **[🔒 Requer Token]**, faz login primeiro, copia o token e envia no header:
 
----
+```text
+Authorization: Bearer SEU_TOKEN_AQUI
+```
 
-### 1. 🛡️ Segurança e Autenticação (Usuários)
+## Rotas de Usuários
 
-#### Inclusão de Usuário
+### Criar usuário
 - **Método:** `POST`
 - **Rota:** `/usuarios`
-- **Regras:** A senha deve conter 8 caracteres, maiúscula, minúscula, número e símbolo.
-- **JSON:**
+- **Autenticação:** pública
+
+Exemplo de JSON:
 ```json
 {
   "nome": "Giuli Pereira",
   "email": "giuli@senac.br",
   "senha": "password@2026"
 }
+```
 
-Listar Usuários
-Método: GET
+### Listar usuários
+- **Método:** `GET`
+- **Rota:** `/usuarios`
+- **Autenticação:** pública
 
-Rota: /usuarios
+Sem body.
 
-Nenhum Body necessário.
+### Login
+- **Método:** `POST`
+- **Rota:** `/login`
+- **Autenticação:** pública
 
-Login (Geração de Token JWT)
-Método: POST
-
-Rota: /login
-
-Regra: Se errares a senha 3x, a conta será bloqueada.
-
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "email": "admin@senac.br",
   "senha": "Senha@123"
 }
+```
 
-Solicitar Recuperação de Senha
-Método: POST
+### Solicitar recuperação de senha
+- **Método:** `POST`
+- **Rota:** `/recuperar-senha`
+- **Autenticação:** pública
 
-Rota: /recuperar-senha
-
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "email": "admin@senac.br"
 }
+```
 
-Alterar Senha (com o código recebido)
-Método: POST
+### Alterar senha
+- **Método:** `POST`
+- **Rota:** `/alterar-senha`
+- **Autenticação:** pública
 
-Rota: /alterar-senha
-
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "email": "admin@senac.br",
-  "codigo": "COLOQUE_O_CODIGO_RECEBIDO_NO_CONSOLE_AQUI",
+  "codigo": "123456",
   "novaSenha": "NovaSenha@2026"
 }
+```
 
-2. 📖 Gestão de Livros
-Cadastrar Livro [🔒 Requer Token]
-Método: POST
+## Rotas de Livros
 
-Rota: /livros
+### Criar livro [🔒 Requer Token]
+- **Método:** `POST`
+- **Rota:** `/livros`
 
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "titulo": "Arquitetura Limpa",
   "autor": "Robert C. Martin",
   "quant": 5,
-  "preco_multa": 4.50
+  "preco_multa": 4.5
 }
+```
 
-Listar Livros
-Método: GET
+### Listar livros
+- **Método:** `GET`
+- **Rota:** `/livros`
+- **Autenticação:** pública
 
-Rota: /livros
+Sem body.
 
-Excluir Livro (Soft Delete) [🔒 Requer Token]
-Método: DELETE
+### Excluir livro [🔒 Requer Token]
+- **Método:** `DELETE`
+- **Rota:** `/livros/:id`
 
-Rota: /livros/1 (Substitua 1 pelo ID do livro)
+Sem body. Exemplo:
+```text
+/livros/1
+```
 
-Regra (Anomalia): O utilizador autenticado não pode excluir mais de 5 livros no mesmo dia.
+Observação: o utilizador autenticado não pode excluir mais de 5 livros no mesmo dia.
 
-3. 🎓 Gestão de Alunos
-Cadastrar Aluno [🔒 Requer Token]
-Método: POST
+## Rotas de Alunos
 
-Rota: /alunos
+### Criar aluno [🔒 Requer Token]
+- **Método:** `POST`
+- **Rota:** `/alunos`
 
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "nome": "João Silva",
   "email": "joao.silva@teste.com",
-  "saldo_credit": 50.00
+  "saldo_credit": 50.0
 }
+```
 
-Listar Alunos
-Método: GET
+### Listar alunos
+- **Método:** `GET`
+- **Rota:** `/alunos`
+- **Autenticação:** pública
 
-Rota: /alunos
+Sem body.
 
-Excluir Aluno (Soft Delete) [🔒 Requer Token]
-Método: DELETE
+### Excluir aluno [🔒 Requer Token]
+- **Método:** `DELETE`
+- **Rota:** `/alunos/:id`
 
-Rota: /alunos/1 (Substitua 1 pelo ID do aluno)
+Sem body. Exemplo:
+```text
+/alunos/1
+```
 
-4. 🔄 Empréstimos e Depósitos
-Realizar Depósito (Adicionar saldo) [🔒 Requer Token]
-Método: POST
+## Rotas de Depósitos
 
-Rota: /depositos
+### Criar depósito [🔒 Requer Token]
+- **Método:** `POST`
+- **Rota:** `/depositos`
 
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "alunoId": 1,
   "tipo": "PIX",
-  "valor": 15.50
+  "valor": 15.5
 }
+```
 
-Listar Depósitos
-Método: GET
+### Listar depósitos
+- **Método:** `GET`
+- **Rota:** `/depositos`
+- **Autenticação:** pública
 
-Rota: /depositos
+Sem body.
 
-Registrar Empréstimo [🔒 Requer Token]
-Método: POST
+## Rotas de Empréstimos
 
-Rota: /emprestimos
+### Criar empréstimo [🔒 Requer Token]
+- **Método:** `POST`
+- **Rota:** `/emprestimos`
 
-Regra: Consome 2.0 * quant de crédito do aluno.
-
-JSON:
-
-JSON
+Exemplo de JSON:
+```json
 {
   "alunoId": 1,
   "livroId": 1,
   "quant": 1
 }
+```
 
-Listar Empréstimos [🔒 Requer Token]
-Método: GET
+Observação: a operação consome `2.0 * quant` do saldo de crédito do aluno.
 
-Rota: /emprestimos
+### Listar empréstimos [🔒 Requer Token]
+- **Método:** `GET`
+- **Rota:** `/emprestimos`
 
-Devolver Livro (Excluir Empréstimo) [🔒 Requer Token]
-Método: DELETE
+Sem body.
 
-Rota: /emprestimos/1 (Substitua 1 pelo ID do empréstimo)
+### Devolver livro [🔒 Requer Token]
+- **Método:** `DELETE`
+- **Rota:** `/emprestimos/:id`
+
+Sem body. Exemplo:
+```text
+/emprestimos/1
+```
