@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,6 +6,48 @@ datasource db {
   provider = "mysql"
 }
 
+// -------------------------------------------------------------------
+// 1. MODELO OBRIGATÓRIO DE USUÁRIOS
+// -------------------------------------------------------------------
+model Usuario {
+  id                  Int          @id @default(autoincrement())
+  nome                String
+  email               String       @unique
+  senha               String       // Será armazenada criptografada (bcrypt)
+  
+  // RECURSO ADICIONAL #1: Status de conta e token randômico 
+  // (usado para ativação no cadastro e rotina de esqueci a senha)
+  status              String       @default("INATIVO") 
+  tokenValidacao      String?      
+  
+  // RECURSO ADICIONAL #3: Bloqueio por tentativas inválidas
+  tentativasInvalidas Int          @default(0) 
+
+  // Relacionamentos
+  logs                Log[]
+  emprestimos         Emprestimo[] // Relacionamento com outra model do sistema
+
+  @@map("usuarios")
+}
+
+// -------------------------------------------------------------------
+// 2. MODELO OBRIGATÓRIO DE LOGS (Auditoria)
+// -------------------------------------------------------------------
+model Log {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  acao      String   // Ex: "LOGIN_SUCESSO", "TENTATIVA_INVALIDA", "EXCLUSAO_LIVRO"
+  data      DateTime @default(now())
+
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("logs")
+}
+
+// -------------------------------------------------------------------
+// TABELAS ORIGINAIS DO SISTEMA ATUALIZADAS
+// -------------------------------------------------------------------
+
 model Livro {
   id          Int          @id @default(autoincrement())
   titulo      String
@@ -18,6 +55,10 @@ model Livro {
   quant       Int          // Estoque de livros disponíveis na estante
   preco_multa Float        // Valor cobrado por dia de atraso na devolução
   emprestimos Emprestimo[]
+
+  // RECURSO ADICIONAL #7: Soft Delete (Exclusão Lógica)
+  deleted     Boolean      @default(false)
+  deletedAt   DateTime?
 
   @@map("livros")
 }
@@ -30,6 +71,10 @@ model Aluno {
   emprestimos  Emprestimo[]
   depositos    Deposito[]
 
+  // RECURSO ADICIONAL #7: Soft Delete (Exclusão Lógica)
+  deleted      Boolean      @default(false)
+  deletedAt    DateTime?
+
   @@map("alunos")
 }
 
@@ -37,11 +82,13 @@ model Emprestimo {
   id        Int      @id @default(autoincrement())
   alunoId   Int
   livroId   Int
+  usuarioId Int?     // Quem realizou o registro (Relacionamento da model Usuario com o sistema)
   quant     Int      @default(1)
   data      DateTime @default(now())
 
   aluno     Aluno    @relation(fields: [alunoId], references: [id], onDelete: Cascade)
   livro     Livro    @relation(fields: [livroId], references: [id], onDelete: Cascade)
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
 
   @@map("emprestimos")
 }

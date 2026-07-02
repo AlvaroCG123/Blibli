@@ -16,10 +16,27 @@ export class AlunoController {
 
   async list(req: Request, res: Response): Promise<Response> {
     try {
-      const alunos = await prisma.aluno.findMany();
+      // Retorna apenas alunos que não foram deletados
+      const alunos = await prisma.aluno.findMany({
+        where: { deleted: false }
+      });
       return res.json(alunos);
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao buscar alunos.' });
+    }
+  }
+
+  // RECURSO ADICIONAL #7: Soft Delete
+  async delete(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    try {
+      await prisma.aluno.update({
+        where: { id: Number(id) },
+        data: { deleted: true, deletedAt: new Date() }
+      });
+      return res.json({ message: 'Aluno removido do sistema (Soft Delete).' });
+    } catch (error) {
+      return res.status(400).json({ error: 'Erro ao apagar aluno.' });
     }
   }
 }
