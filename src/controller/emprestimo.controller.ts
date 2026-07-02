@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
 import { IEmprestimoInput } from '../interface/emprestimo.interface';
+import { Prisma } from '@prisma/client/extension';
 
 export class EmprestimoController {
   
@@ -11,7 +12,8 @@ export class EmprestimoController {
     try {
       const livroIdCorreto = livroId || (req.body as any).livroId;
 
-      const resultado = await prisma.$transaction(async (tx) => {
+      // 2. Adicione a tipagem no tx aqui:
+      const resultado = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const livro = await tx.livro.findUnique({ where: { id: livroIdCorreto } });
         if (!livro || livro.quant < quant) {
           throw new Error('Livro indisponível no acervo ou estoque insuficiente.');
@@ -64,7 +66,8 @@ export class EmprestimoController {
     const { id } = req.params;
 
     try {
-      await prisma.$transaction(async (tx) => {
+      // 3. Adicione a tipagem no tx aqui também:
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const emprestimo = await tx.emprestimo.findUnique({ where: { id: Number(id) } });
         if (!emprestimo) throw new Error('Registro de empréstimo não encontrado.');
 

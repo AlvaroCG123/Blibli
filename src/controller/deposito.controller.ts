@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
 import { IDepositoInput } from '../interface/deposito.interface';
+import { Prisma } from '@prisma/client/extension';
 
 export class DepositoController {
   async create(req: Request, res: Response): Promise<Response> {
     const { alunoId, tipo, valor }: IDepositoInput = req.body;
 
     try {
-      const resultado = await prisma.$transaction(async (tx) => {
+      // 2. Adicione a tipagem (tx: Prisma.TransactionClient) aqui:
+      const resultado = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const aluno = await tx.aluno.findUnique({ where: { id: alunoId } });
         if (!aluno) throw new Error('Aluno não encontrado.');
 

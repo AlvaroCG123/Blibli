@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 export class UsuarioController {
   // 1. INCLUSÃO DE UTILIZADOR
@@ -90,7 +91,7 @@ export class UsuarioController {
       const usuario = await prisma.usuario.findUnique({ where: { email } });
       if (!usuario) return res.status(404).json({ error: 'Utilizador não encontrado.' });
 
-      // Gera um token aleatório simples (ex: 123456)
+      // Gera um token aleatório simples de 6 dígitos (ex: 123456)
       const tokenRecuperacao = Math.floor(100000 + Math.random() * 900000).toString();
       
       await prisma.usuario.update({
@@ -98,12 +99,30 @@ export class UsuarioController {
         data: { tokenValidacao: tokenRecuperacao }
       });
 
-      // NOTA: Em produção usar-se-ia o Nodemailer aqui para enviar o e-mail real.
-      console.log(`[SIMULAÇÃO DE EMAIL] Para o email ${email}: O teu código de recuperação é ${tokenRecuperacao}`);
+      // Configuração do Nodemailer com Mailtrap para testes
+      const transporter = nodemailer.createTransport({
+        host: "sandbox.smtp.mailtrap.io", // O host pode ser diferente dependendo da tua conta, confirma no Mailtrap
+        port: 2525, // Porta padrão do Mailtrap
+        auth: {
+          user: process.env.MAILTRAP_USER,
+          pass: process.env.MAILTRAP_PASS
+        }
+      });
 
-      return res.json({ message: 'Se o e-mail existir, um código de recuperação foi enviado.' });
+      const mailOptions = {
+        from: '"Biblioteca Senac" <nao-responder@biblioteca.senac.br>', // Podes inventar qualquer e-mail emissor no Mailtrap
+        to: email,
+        subject: 'Recuperação de Palavra-passe',
+        text: `Olá ${usuario.nome},\n\nO teu código de recuperação é: ${tokenRecuperacao}\n\nSe não solicitaste esta alteração, podes ignorar esta mensagem.`
+      };
+
+      // Dispara o e-mail
+      await transporter.sendMail(mailOptions);
+
+      return res.json({ message: 'Se o e-mail existir no sistema, um código de recuperação foi enviado.' });
     } catch (error) {
-      return res.status(500).json({ error: 'Erro ao solicitar recuperação.' });
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao solicitar recuperação de palavra-passe.' });
     }
   }
 

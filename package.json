@@ -1,22 +1,25 @@
 {
   "name": "trabalhocafeteria",
   "version": "1.0.0",
-  "description": "",
+  "description": "Este projeto implementa uma API para a gestão de uma Biblioteca com um robusto sistema de segurança, incluindo autenticação via Token JWT, proteção contra ataques de força bruta, deteção de anomalias diárias e *Soft Delete*.",
+  "homepage": "https://github.com/AlvaroCG123/Blibli#readme",
+  "bugs": {
+    "url": "https://github.com/AlvaroCG123/Blibli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlvaroCG123/Blibli.git"
+  },
   "license": "ISC",
   "author": "",
   "type": "module",
   "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
   "scripts": {
     "dev": "npx tsx watch src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.9.1",
-    "prisma": "^7.8.0",
-    "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",
@@ -25,6 +28,16 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.9.4",
+    "@types/nodemailer": "^8.0.1",
+    "prisma": "^7.8.0",
+    "tsx": "^4.22.5",
+    "typescript": "^6.0.3"
   }
 }
